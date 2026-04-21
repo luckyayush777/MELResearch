@@ -114,6 +114,73 @@ The strongest path now is:
    - FAISS / retrieval index
 4. If time allows, also reproduce **M3EL** as a stronger follow-up anchor.
 
+## Concrete Reproduction Order
+
+If the goal is to raise the baseline before quantization, use this order:
+
+1. **MIMIC** first.
+  - Best chance of a clean reproduction.
+  - Strong enough to replace the current weak baseline with a credible number.
+  - Use this as the paper-grade anchor for all later quantization runs.
+
+2. **M3EL** second.
+  - Slightly stronger than MIMIC in the common comparison table.
+  - Good follow-up if MIMIC lands cleanly and you want more headroom.
+
+3. **OT-MEL** or **MELOV** third.
+  - These are strong retrieval-only comparators in the same family.
+  - Useful if you want a second strong point without moving to a multi-stage pipeline.
+
+4. **KGMEL** last.
+  - Treat this as the ceiling, not the starting point.
+  - Best if you want to compare against the strongest published number, but it is not the cleanest quantization baseline.
+
+## What To Record For Each Reproduction
+
+Keep the same evaluation protocol for every paper target:
+
+1. `H@1`, `H@3`, `H@5`, and `MRR`.
+2. Candidate KB size and whether the run is retrieval-only or retrieval + rerank.
+3. Model size, embedding storage size, and ANN index size.
+4. Latency, throughput, and peak memory on the same hardware.
+5. Exact repo commit, dependency versions, and any dataset preprocessing steps.
+
+## Baseline Rule
+
+Do not quantize the current weak OpenCLIP-style baseline and expect it to approach the published MEL numbers.
+Quantization is the follow-up experiment after you have a strong unquantized retrieval baseline, not a replacement for one.
+
+## MIMIC Reproduction Steps
+
+Use the official MIMIC repository workflow:
+
+1. Create the environment.
+  - Use Conda.
+  - The repo recommends Python `3.8.12`.
+  - Install the package versions from `requirements.txt` in the MIMIC repo.
+
+2. Download the data.
+  - WikiMEL and RichpediaMEL are available from MELBench.
+  - WikiDiverse is available from the WikiDiverse repository.
+  - The MIMIC README also links to cleaned copies of the datasets.
+
+3. Update the data paths in the config.
+  - Edit the YAML file for WikiMEL in the repo's `config/` directory.
+  - Replace `YOUR_PATH` with the local dataset path.
+  - Make sure the mention-image and KB-image folders match the dataset layout.
+
+4. Run training.
+  - The official entrypoint is `bash run.sh <gpu_id> <dataset_name>`.
+  - For WikiMEL, use `bash run.sh 0 wikimel`.
+
+5. Validate the result.
+  - The model reports `H@1`, `H@3`, `H@5`, `MRR`, and mean rank during validation/test.
+  - The official WikiMEL target to beat is `87.98 H@1` and `91.82 MRR`.
+
+6. Lock the baseline.
+  - Record the exact commit, package versions, dataset source, and config values.
+  - Keep that checkpoint fixed before doing any quantization.
+
 ## Sources
 
 - MIMIC official repo: `https://github.com/pengfei-luo/MIMIC`
