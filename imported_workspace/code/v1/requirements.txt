@@ -1,0 +1,18 @@
+# Core dependencies
+torch>=2.0.0
+transformers>=4.30.0
+numpy>=1.24.0
+
+# Visualization
+matplotlib>=3.7.0
+
+# Data handling
+pillow>=9.0.0
+
+# Optional: Advanced quantization
+# bitsandbytes>=0.41.0  # For 4-bit/8-bit quantization
+# auto-gptq>=0.4.0      # For GPTQ quantization
+# optimum>=1.12.0       # HuggingFace optimization tools
+
+# Development
+tqdm>=4.65.0

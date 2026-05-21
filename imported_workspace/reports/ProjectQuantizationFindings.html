@@ -1,0 +1,1043 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MIMIC WikiMEL Quantization Findings</title>
+  <style>
+    :root {
+      --ink: #18202a;
+      --muted: #5b6470;
+      --line: #d9dee5;
+      --panel: #ffffff;
+      --paper: #f6f7f9;
+      --blue: #1d5f96;
+      --green: #247a52;
+      --red: #a94738;
+      --gold: #9a6a13;
+      --teal: #0f6e73;
+      --shadow: 0 14px 34px rgba(24, 32, 42, 0.10);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+
+    a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 28px 22px;
+      background: #202833;
+      color: #eef3f7;
+      border-right: 1px solid #151b23;
+      overflow: auto;
+    }
+
+    aside h2 {
+      margin: 0 0 10px;
+      font-size: 15px;
+      letter-spacing: 0;
+      font-weight: 760;
+    }
+
+    aside p {
+      margin: 0 0 22px;
+      color: #b9c3ce;
+      font-size: 13px;
+    }
+
+    nav {
+      display: grid;
+      gap: 4px;
+    }
+
+    nav a {
+      color: #dce5ed;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 13px;
+    }
+
+    nav a:hover {
+      background: #2f3a47;
+      text-decoration: none;
+    }
+
+    main {
+      min-width: 0;
+    }
+
+    .hero {
+      min-height: 78vh;
+      display: grid;
+      align-items: center;
+      padding: 54px clamp(22px, 5vw, 76px) 42px;
+      background:
+        linear-gradient(90deg, rgba(20, 30, 42, 0.86), rgba(20, 30, 42, 0.58)),
+        url("tmp/geometry_smoke/retrieval_vs_bits.png");
+      background-size: cover;
+      background-position: center;
+      color: white;
+      border-bottom: 1px solid #c8ced6;
+    }
+
+    .hero-inner {
+      max-width: 980px;
+    }
+
+    .eyebrow {
+      color: #bfe1ee;
+      text-transform: uppercase;
+      font-size: 12px;
+      font-weight: 780;
+      letter-spacing: 0.08em;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(42px, 6vw, 78px);
+      line-height: 0.98;
+      max-width: 930px;
+      letter-spacing: 0;
+    }
+
+    .hero-lede {
+      margin: 24px 0 30px;
+      max-width: 850px;
+      color: #e4ebf0;
+      font-size: clamp(17px, 2vw, 22px);
+    }
+
+    .hero-metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(130px, 1fr));
+      gap: 12px;
+      max-width: 880px;
+    }
+
+    .hero-metric {
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.10);
+      backdrop-filter: blur(8px);
+      border-radius: 8px;
+      padding: 14px;
+      min-height: 104px;
+    }
+
+    .hero-metric strong {
+      display: block;
+      font-size: 28px;
+      line-height: 1.1;
+    }
+
+    .hero-metric span {
+      display: block;
+      margin-top: 8px;
+      color: #cdd8e0;
+      font-size: 13px;
+    }
+
+    section {
+      padding: 54px clamp(22px, 5vw, 76px);
+      border-bottom: 1px solid var(--line);
+      background: var(--paper);
+    }
+
+    section:nth-of-type(even) {
+      background: #ffffff;
+    }
+
+    .section-head {
+      max-width: 980px;
+      margin-bottom: 28px;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: clamp(26px, 3vw, 40px);
+      line-height: 1.12;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 0 0 10px;
+      font-size: 20px;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 0 0 14px;
+    }
+
+    .lead {
+      color: var(--muted);
+      max-width: 980px;
+      font-size: 17px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid.cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid.cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .metric-card,
+    .note,
+    .step {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+
+    .metric-card .label {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .metric-card .value {
+      font-size: 30px;
+      line-height: 1.1;
+      font-weight: 780;
+    }
+
+    .metric-card .detail {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 8px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 780px;
+    }
+
+    th,
+    td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      font-size: 14px;
+    }
+
+    th {
+      background: #edf1f5;
+      font-size: 12px;
+      color: #465160;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .num {
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .good {
+      color: var(--green);
+      font-weight: 720;
+    }
+
+    .warn {
+      color: var(--gold);
+      font-weight: 720;
+    }
+
+    .bad {
+      color: var(--red);
+      font-weight: 720;
+    }
+
+    .process {
+      counter-reset: step;
+      display: grid;
+      gap: 14px;
+    }
+
+    .step {
+      position: relative;
+      padding-left: 66px;
+    }
+
+    .step:before {
+      counter-increment: step;
+      content: counter(step);
+      position: absolute;
+      left: 20px;
+      top: 21px;
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #233449;
+      color: #fff;
+      font-weight: 760;
+      font-size: 13px;
+    }
+
+    .bars {
+      display: grid;
+      gap: 12px;
+      max-width: 920px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 190px 1fr 110px;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .bar-label,
+    .bar-value {
+      font-size: 14px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .track {
+      height: 14px;
+      background: #e2e7ed;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .fill {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--blue);
+    }
+
+    .fill.green {
+      background: var(--green);
+    }
+
+    .fill.teal {
+      background: var(--teal);
+    }
+
+    .fill.gold {
+      background: var(--gold);
+    }
+
+    code {
+      background: #edf1f5;
+      border: 1px solid #d9dee5;
+      border-radius: 5px;
+      padding: 1px 5px;
+      font-family: "Cascadia Mono", Consolas, monospace;
+      font-size: 0.92em;
+    }
+
+    .file-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .file-list div {
+      padding: 10px 12px;
+      border-left: 4px solid var(--blue);
+      background: #fff;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .callout {
+      border-left: 5px solid var(--teal);
+      background: #eef7f7;
+      padding: 18px 20px;
+      border-radius: 6px;
+      max-width: 1040px;
+    }
+
+    .footer {
+      padding: 32px clamp(22px, 5vw, 76px);
+      color: var(--muted);
+      font-size: 13px;
+      background: #202833;
+      color: #cbd5df;
+    }
+
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      aside {
+        position: static;
+        height: auto;
+        padding: 18px 20px;
+      }
+
+      nav {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .hero-metrics,
+      .grid.cols-2,
+      .grid.cols-3 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .hero {
+        min-height: auto;
+        padding-top: 46px;
+      }
+
+      nav {
+        grid-template-columns: 1fr;
+      }
+
+      .bar-row {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+
+      .step {
+        padding-left: 20px;
+        padding-top: 62px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside>
+      <h2>Project Report</h2>
+      <p>MIMIC WikiMEL no-leak quantization, memory, and deployment findings.</p>
+      <nav>
+        <a href="#summary">Executive Summary</a>
+        <a href="#origin">Project Origin</a>
+        <a href="#process">Process Followed</a>
+        <a href="#experiments">Experiments</a>
+        <a href="#memory">GPU Memory</a>
+        <a href="#framework">Framework Story</a>
+        <a href="#caveats">Caveats</a>
+        <a href="#next">Next Steps</a>
+        <a href="#files">Files</a>
+      </nav>
+    </aside>
+
+    <main>
+      <header class="hero" id="summary">
+        <div class="hero-inner">
+          <div class="eyebrow">Saved 2026-05-19</div>
+          <h1>Quantization for cheaper multimodal entity linking inference</h1>
+          <p class="hero-lede">
+            The project moved from a leaked WikiMEL baseline to a clean no-leak evaluation, then built a per-tensor quantization workflow that compresses MIMIC entity caches while preserving retrieval quality.
+          </p>
+          <div class="hero-metrics">
+            <div class="hero-metric">
+              <strong>14.90%</strong>
+              <span>logical cache left after text+image int4</span>
+            </div>
+            <div class="hero-metric">
+              <strong>1.835x</strong>
+              <span>best speedup at chunk 5000 vs fp32 same chunk</span>
+            </div>
+            <div class="hero-metric">
+              <strong>5.85 GB</strong>
+              <span>peak eval allocation at the recommended chunk</span>
+            </div>
+            <div class="hero-metric">
+              <strong>-0.00025</strong>
+              <span>H@1 movement for mixed int4 in the usable range</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section>
+        <div class="section-head">
+          <h2>Executive Summary</h2>
+          <p class="lead">
+            The strongest current claim is practical and defensible: representation quantization can shrink entity-side caches and transfer cost dramatically, while chunk-size control moves the system toward smaller GPU feasibility.
+          </p>
+        </div>
+
+        <div class="grid cols-3">
+          <div class="metric-card">
+            <div class="label">Best short-term deployment setting</div>
+            <div class="value">int4 + chunk 5000</div>
+            <div class="detail">Quantize both entity text tokens and image patch tokens; keep CLS tensors fp32.</div>
+          </div>
+          <div class="metric-card">
+            <div class="label">Best conservative single-tensor setting</div>
+            <div class="value">text tokens int4</div>
+            <div class="detail">H@1 unchanged, MRR slightly higher, 1.77x speedup in the full text-token sweep.</div>
+          </div>
+          <div class="metric-card">
+            <div class="label">Main limitation discovered</div>
+            <div class="value">matcher VRAM</div>
+            <div class="detail">At fixed chunk size, peak VRAM is dominated by dequantized TGLU/matcher tensors.</div>
+          </div>
+        </div>
+
+        <div class="callout" style="margin-top: 22px;">
+          <strong>One-line pitch:</strong> On clean WikiMEL, the framework reduces logical entity cache size to about 15% of fp32 and reaches about 1.84x throughput under a roughly 6 GB eval memory budget, with negligible retrieval-quality movement.
+        </div>
+      </section>
+
+      <section id="origin">
+        <div class="section-head">
+          <h2>Project Origin</h2>
+          <p class="lead">
+            The first major discovery was that the old high-accuracy WikiMEL result was invalid. The project was reset around a no-leak dataset and a clean checkpoint, which makes the later quantization results more credible.
+          </p>
+        </div>
+
+        <div class="grid cols-2">
+          <div class="note">
+            <h3>Leakage Removed</h3>
+            <p>Earlier results around 96.65 H@1 were rejected because train/test duplicates, image overlap, and gold entity image leakage were present.</p>
+            <p>The clean dataset lives at <code>ExpSetup/external/MIMIC_reproduction/data/WikiMEL_noleak</code>.</p>
+          </div>
+          <div class="note">
+            <h3>Clean Baseline Locked</h3>
+            <p>The valid checkpoint is <code>runs/WikiMEL_noleak/version_4/checkpoints/final.ckpt</code>.</p>
+            <p>The clean fp32 reference used for quantization is approximately H@1 0.741379 and MRR 0.818783.</p>
+          </div>
+        </div>
+
+        <div class="table-wrap" style="margin-top: 20px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Baseline</th>
+                <th>H@1</th>
+                <th>H@3</th>
+                <th>H@5</th>
+                <th>H@10</th>
+                <th>H@20</th>
+                <th>MR</th>
+                <th>MRR</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Clean no-leak fp32</td>
+                <td class="num">0.741379</td>
+                <td class="num">0.879310</td>
+                <td class="num">0.919040</td>
+                <td class="num">0.954773</td>
+                <td class="num">0.974013</td>
+                <td class="num">40.654423</td>
+                <td class="num">0.818783</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="process">
+        <div class="section-head">
+          <h2>Process Followed</h2>
+          <p class="lead">
+            The project followed a progressively tighter loop: clean the benchmark, instrument the system, isolate tensor targets, combine the winning settings, then sweep chunk sizes for the smaller-GPU story.
+          </p>
+        </div>
+
+        <div class="process">
+          <div class="step">
+            <h3>Clean the evaluation target</h3>
+            <p>Audited WikiMEL leakage, removed split/image overlap, and switched all comparisons to the no-leak checkpoint and config.</p>
+          </div>
+          <div class="step">
+            <h3>Measure the right deployment metrics</h3>
+            <p>Defined accuracy, cache size, disk size, latency, throughput, subprocess timing, rank stability, quantization error, and GPU memory metrics in <code>SmallerCheapGPU_MetricsPlan.md</code>.</p>
+          </div>
+          <div class="step">
+            <h3>Target the largest repeated entity-side tensors</h3>
+            <p>Focused first on <code>entity_text_tokens</code>, because it occupies 8591.88 MB of the fp32 cache and feeds the expensive TGLU path.</p>
+          </div>
+          <div class="step">
+            <h3>Run isolated tensor sweeps</h3>
+            <p>Tested text tokens across fp32, int8, int6, int4, int3, and int2; then tested image patch tokens fp32 vs int4.</p>
+          </div>
+          <div class="step">
+            <h3>Combine text and image compression</h3>
+            <p>Quantized both local token tensors to int4 while keeping <code>text_cls</code> and <code>image_cls</code> in fp32 to protect global matching and fusion calibration.</p>
+          </div>
+          <div class="step">
+            <h3>Sweep chunk sizes</h3>
+            <p>Compared fp32, text-token int4, and text+image int4 at chunk sizes 1000, 2500, 5000, 10000, and 20000. The 40000 run was stopped because it was too slow and unnecessary after the 20000 behavior was clear.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="experiments">
+        <div class="section-head">
+          <h2>Experiment Findings</h2>
+          <p class="lead">
+            The evidence separates neatly into three experiments: text-token quantization, image-patch quantization, and mixed local-token quantization.
+          </p>
+        </div>
+
+        <h3>Text Tokens Sweep</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Mode</th>
+                <th>H@1</th>
+                <th>MRR</th>
+                <th>Runtime</th>
+                <th>Speedup</th>
+                <th>Total cache</th>
+                <th>Text-token cache</th>
+                <th>Transfer</th>
+                <th>TGLU</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>fp32</td>
+                <td class="num">0.741379</td>
+                <td class="num">0.818783</td>
+                <td class="num">1378.72 s</td>
+                <td class="num">1.00x</td>
+                <td class="num">10860.67 MB</td>
+                <td class="num">8591.88 MB</td>
+                <td class="num">293.91 s</td>
+                <td class="num">1033.43 s</td>
+              </tr>
+              <tr>
+                <td>int8</td>
+                <td class="num">0.741379</td>
+                <td class="num">0.818783</td>
+                <td class="num">1268.58 s</td>
+                <td class="num">1.09x</td>
+                <td class="num">4433.54 MB</td>
+                <td class="num">2164.75 MB</td>
+                <td class="num">129.14 s</td>
+                <td class="num">1089.43 s</td>
+              </tr>
+              <tr>
+                <td>int6</td>
+                <td class="num">0.741379</td>
+                <td class="num">0.818783</td>
+                <td class="num">1258.15 s</td>
+                <td class="num">1.10x</td>
+                <td class="num">3896.55 MB</td>
+                <td class="num">1627.76 MB</td>
+                <td class="num">127.25 s</td>
+                <td class="num">1082.47 s</td>
+              </tr>
+              <tr>
+                <td><strong>int4</strong></td>
+                <td class="num good">0.741379</td>
+                <td class="num good">0.818785</td>
+                <td class="num">778.41 s</td>
+                <td class="num good">1.77x</td>
+                <td class="num">3359.56 MB</td>
+                <td class="num">1090.77 MB</td>
+                <td class="num">127.79 s</td>
+                <td class="num">601.43 s</td>
+              </tr>
+              <tr>
+                <td>int3</td>
+                <td class="num">0.741629</td>
+                <td class="num">0.818859</td>
+                <td class="num">725.97 s</td>
+                <td class="num">1.90x</td>
+                <td class="num">3091.06 MB</td>
+                <td class="num">822.27 MB</td>
+                <td class="num">126.96 s</td>
+                <td class="num">550.42 s</td>
+              </tr>
+              <tr>
+                <td>int2</td>
+                <td class="num">0.741129</td>
+                <td class="num">0.818744</td>
+                <td class="num">731.14 s</td>
+                <td class="num">1.89x</td>
+                <td class="num">2822.57 MB</td>
+                <td class="num">553.77 MB</td>
+                <td class="num">128.76 s</td>
+                <td class="num">553.08 s</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="grid cols-2" style="margin-top: 22px;">
+          <div class="note">
+            <h3>Why text tokens matter</h3>
+            <p>The fp32 entity cache is dominated by text tokens: 8591.88 MB out of 10860.67 MB. Compressing them attacks the biggest repeated inference artifact.</p>
+          </div>
+          <div class="note">
+            <h3>Why int4 is the conservative claim</h3>
+            <p>Int3 and int2 look surprisingly strong, but int4 is easier to defend: no H@1 loss, stable MRR, large transfer reduction, and 1.77x speedup.</p>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 34px;">Image Patch Tokens And Mixed Int4</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Configuration</th>
+                <th>H@1</th>
+                <th>MRR</th>
+                <th>Runtime</th>
+                <th>Speedup</th>
+                <th>Logical cache</th>
+                <th>Disk cache</th>
+                <th>Transfer</th>
+                <th>Rank flips</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>image_patch_tokens int4 only</td>
+                <td class="num">0.741379</td>
+                <td class="num">0.818784</td>
+                <td class="num">1327.74 s</td>
+                <td class="num">1.03x</td>
+                <td class="num">9119.64 MB</td>
+                <td class="num">9361.12 MB</td>
+                <td class="num">257.24 s</td>
+                <td class="num">120</td>
+              </tr>
+              <tr>
+                <td><strong>text_tokens + image_patch_tokens int4</strong></td>
+                <td class="num">0.741129</td>
+                <td class="num">0.818608</td>
+                <td class="num">1309.64 s</td>
+                <td class="num">1.07x</td>
+                <td class="num good">1618.53 MB</td>
+                <td class="num good">2925.63 MB</td>
+                <td class="num good">89.03 s</td>
+                <td class="num">114</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="memory">
+        <div class="section-head">
+          <h2>GPU Memory And Chunk Size</h2>
+          <p class="lead">
+            The chunk-size sweep clarified the deployment story. Quantization reduces cache and transfer cost, while chunk size controls peak evaluation allocation.
+          </p>
+        </div>
+
+        <div class="bars">
+          <div class="bar-row">
+            <div class="bar-label">chunk 1000</div>
+            <div class="track"><div class="fill green" style="width: 7.8%;"></div></div>
+            <div class="bar-value">1.68 GB</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">chunk 2500</div>
+            <div class="track"><div class="fill green" style="width: 15.1%;"></div></div>
+            <div class="bar-value">3.24 GB</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">chunk 5000</div>
+            <div class="track"><div class="fill teal" style="width: 27.2%;"></div></div>
+            <div class="bar-value">5.85 GB</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">chunk 10000</div>
+            <div class="track"><div class="fill gold" style="width: 51.5%;"></div></div>
+            <div class="bar-value">11.06 GB</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">chunk 20000</div>
+            <div class="track"><div class="fill" style="width: 100%;"></div></div>
+            <div class="bar-value">21.49 GB</div>
+          </div>
+        </div>
+
+        <div class="table-wrap" style="margin-top: 26px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Mode</th>
+                <th>Chunk</th>
+                <th>H@1</th>
+                <th>MRR</th>
+                <th>Peak eval VRAM</th>
+                <th>Runtime</th>
+                <th>QPS</th>
+                <th>Transfer</th>
+                <th>Speedup</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>fp32_ref</td>
+                <td class="num">5000</td>
+                <td class="num">0.741629</td>
+                <td class="num">0.818908</td>
+                <td class="num">5850.26 MB</td>
+                <td class="num">436.03 s</td>
+                <td class="num">9.178</td>
+                <td class="num">293.97 s</td>
+                <td class="num">1.00x</td>
+              </tr>
+              <tr>
+                <td>text_tokens_int4</td>
+                <td class="num">5000</td>
+                <td class="num good">0.741629</td>
+                <td class="num good">0.818910</td>
+                <td class="num">5850.26 MB</td>
+                <td class="num">274.88 s</td>
+                <td class="num">14.559</td>
+                <td class="num">130.24 s</td>
+                <td class="num good">1.586x</td>
+              </tr>
+              <tr>
+                <td><strong>text_image_tokens_int4</strong></td>
+                <td class="num"><strong>5000</strong></td>
+                <td class="num">0.741379</td>
+                <td class="num">0.818733</td>
+                <td class="num good">5850.26 MB</td>
+                <td class="num good">237.58 s</td>
+                <td class="num good">16.845</td>
+                <td class="num good">89.06 s</td>
+                <td class="num good">1.835x</td>
+              </tr>
+              <tr>
+                <td>text_image_tokens_int4</td>
+                <td class="num">10000</td>
+                <td class="num">0.741379</td>
+                <td class="num">0.818733</td>
+                <td class="num">11064.74 MB</td>
+                <td class="num">238.20 s</td>
+                <td class="num">16.801</td>
+                <td class="num">89.80 s</td>
+                <td class="num">1.823x</td>
+              </tr>
+              <tr>
+                <td>text_image_tokens_int4</td>
+                <td class="num">20000</td>
+                <td class="num">0.741129</td>
+                <td class="num">0.818608</td>
+                <td class="num">21491.13 MB</td>
+                <td class="num bad">2558.70 s</td>
+                <td class="num bad">1.564</td>
+                <td class="num">90.17 s</td>
+                <td class="num bad">0.230x</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout" style="margin-top: 22px;">
+          <strong>Memory interpretation:</strong> fixed-chunk peak VRAM barely changes across fp32 and int4 because the matcher still materializes large dequantized tensors. Smaller GPU feasibility comes from choosing a chunk size that fits the target budget, then using quantization to recover speed and transfer cost.
+        </div>
+      </section>
+
+      <section id="framework">
+        <div class="section-head">
+          <h2>Framework Story</h2>
+          <p class="lead">
+            The project is no longer just a quantization result. It is a prototype for a resource-aware inference planner.
+          </p>
+        </div>
+
+        <div class="grid cols-2">
+          <div class="note">
+            <h3>What the framework does now</h3>
+            <p>Profiles fp32, quantizes selected cache tensors, measures accuracy deltas and deployment metrics, compares modes, and recommends a chunk size for a memory budget.</p>
+          </div>
+          <div class="note">
+            <h3>Where the max gains are</h3>
+            <p>The max gains are in cache footprint, disk size, transfer time, and throughput. Peak matcher memory needs a second phase: tiled or quantized matcher computation.</p>
+          </div>
+        </div>
+
+        <div class="table-wrap" style="margin-top: 22px;">
+          <table>
+            <thead>
+              <tr>
+                <th>GPU budget</th>
+                <th>Recommended setting</th>
+                <th>Chunk</th>
+                <th>Peak eval VRAM</th>
+                <th>Expected behavior</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Around 2 GB</td>
+                <td>text_image_tokens_int4</td>
+                <td class="num">1000</td>
+                <td class="num">1680.08 MB</td>
+                <td>Safest low-memory setting; about 1.80x faster than fp32 same chunk.</td>
+              </tr>
+              <tr>
+                <td>Around 4 GB</td>
+                <td>text_image_tokens_int4</td>
+                <td class="num">2500</td>
+                <td class="num">3243.63 MB</td>
+                <td>Good low-memory throughput at about 15.93 QPS.</td>
+              </tr>
+              <tr>
+                <td>Around 6 GB</td>
+                <td><strong>text_image_tokens_int4</strong></td>
+                <td class="num"><strong>5000</strong></td>
+                <td class="num"><strong>5850.26 MB</strong></td>
+                <td>Best overall operating point from the current sweep.</td>
+              </tr>
+              <tr>
+                <td>Around 12 GB</td>
+                <td>text_image_tokens_int4</td>
+                <td class="num">10000</td>
+                <td class="num">11064.74 MB</td>
+                <td>Similar speed to chunk 5000 but uses much more VRAM.</td>
+              </tr>
+              <tr>
+                <td>Around 24 GB</td>
+                <td class="warn">Avoid mixed chunk 20000</td>
+                <td class="num">20000</td>
+                <td class="num">21491.13 MB</td>
+                <td>Runtime regresses badly and should not be recommended.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="caveats">
+        <div class="section-head">
+          <h2>Caveats And What Not To Overclaim</h2>
+          <p class="lead">
+            The results are strong, but the credible story depends on being precise about what has and has not been proven.
+          </p>
+        </div>
+
+        <div class="grid cols-3">
+          <div class="note">
+            <h3>No fixed-chunk VRAM win yet</h3>
+            <p>At the same chunk size, peak eval allocation is nearly identical across fp32 and int4. Current quantization compresses stored caches, not the full matcher working set.</p>
+          </div>
+          <div class="note">
+            <h3>20000 chunk is pathological</h3>
+            <p>The mixed int4 20000 row took 2558.70 seconds and should be treated as an anomalous non-recommended operating point.</p>
+          </div>
+          <div class="note">
+            <h3>Needs transferability evidence</h3>
+            <p>To sell this as a general framework, it needs at least one adjacent workload beyond this exact WikiMEL setup.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="next">
+        <div class="section-head">
+          <h2>Recommended Next Steps</h2>
+          <p class="lead">
+            The next work should make the result repeatable, product-shaped, and transferable.
+          </p>
+        </div>
+
+        <div class="process">
+          <div class="step">
+            <h3>Repeat the headline rows</h3>
+            <p>Re-run fp32, text-token int4, and text+image int4 at chunks 5000 and 10000. This turns the current best result into a stable claim.</p>
+          </div>
+          <div class="step">
+            <h3>Build the hardware-budget recommender</h3>
+            <p>Input a memory budget such as 4 GB, 6 GB, or 12 GB. Output tensor modes, chunk size, expected H@1/MRR movement, runtime, QPS, and peak VRAM.</p>
+          </div>
+          <div class="step">
+            <h3>Add one adjacent workload</h3>
+            <p>Run the same framework on text-only entity linking, image-text retrieval, reranking, or another entity linking dataset to test transferability.</p>
+          </div>
+          <div class="step">
+            <h3>Attack matcher memory directly</h3>
+            <p>Implement tiled or quantized matcher computation so the system avoids materializing large fp32/dequantized tensors at once.</p>
+          </div>
+          <div class="step">
+            <h3>Prepare paper-quality diagnostics</h3>
+            <p>Add rank-flip examples, top-k overlap, entity-type slices, ambiguous-name slices, and visually grounded slices.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="files">
+        <div class="section-head">
+          <h2>Project File Map</h2>
+          <p class="lead">
+            These are the core artifacts behind the report.
+          </p>
+        </div>
+
+        <div class="file-list">
+          <div><code>18 MayResult.md</code> - leakage cleanup, clean baseline, and initial clean quantization notes.</div>
+          <div><code>19MayReport.md</code> - entity text-token sweep and attribution findings.</div>
+          <div><code>20 MayResult.md</code> - image patch, mixed text+image int4, rank stability, and quantization error.</div>
+          <div><code>19MayGPUMemoryFindings.md</code> - chunk-size sweep, memory findings, and hardware-budget recommendations.</div>
+          <div><code>SmallerCheapGPU_MetricsPlan.md</code> - metric plan for proving cheaper/smaller GPU readiness.</div>
+          <div><code>Mixed Quantization setup/evaluate_entity_text_tokens.py</code> - main evaluator with target tensor modes, metrics, memory tracking, rank batches, and quantization error sampling.</div>
+          <div><code>Mixed Quantization setup/run_chunk_size_sweep.py</code> - chunk-size sweep driver.</div>
+          <div><code>Mixed Quantization setup/results/chunk_size_sweep_full/chunk_size_sweep_summary.csv</code> - raw data for the memory sweep.</div>
+        </div>
+      </section>
+
+      <div class="footer">
+        Standalone report generated from local project reports and result CSVs in <code>C:\Users\user\Desktop\kmpooja</code>. All claims here use the clean WikiMEL no-leak checkpoint, not the old leaked baseline.
+      </div>
+    </main>
+  </div>
+</body>
+</html>

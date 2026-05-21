@@ -3,7 +3,27 @@ __pycache__/
 *.pyc
 
 data/
+datasets/
 external/
 benchmarks/
+results/
+outputs/
+runs/
+checkpoints/
+shards/
+cache/
+entity_cache/
 
 .claude/
+
+*.ckpt
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.npy
+*.npz
+*.pkl
+*.tar
+*.tar.gz
+*.zip

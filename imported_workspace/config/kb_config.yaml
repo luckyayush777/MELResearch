@@ -1,0 +1,9 @@
+kb_source: wikipedia
+language: en
+dump_date: 2024-01
+entity_text: "title + lead"
+max_entity_tokens: 256
+encoder: sentence-transformers/all-mpnet-base-v2
+embedding_dim: 768
+faiss_index: IndexFlatIP
+normalized: true

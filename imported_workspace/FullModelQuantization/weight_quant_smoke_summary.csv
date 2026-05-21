@@ -1,0 +1,4 @@
+mode,weight_quantization_mode,queries,hits@1,mrr,mr,gpu_peak_allocated_mb_eval,queries_per_second,entity_cache_seconds,quantized_linear_layers,quantized_linear_params,run_success,notes
+text_image_tokens_int4_weights_fp32_limit_20_tglu_tile_250,fp32,20,0.95,0.9666666666666666,1.1,1895.90185546875,12.979780552200545,97.5442647000018,0,0,True,baseline with mixed int4 entity cache and TGLU tile 250
+text_image_tokens_int4_weights_int8_limit_20_tglu_tile_250,int8,20,0.95,0.975,1.05,1897.49560546875,12.800303930584986,97.2853746000037,163,123772192,True,all nn.Linear weights quantized then dequantized for fp32 execution
+text_image_tokens_int4_weights_int4_limit_20_tglu_tile_250,int4,20,1.0,1.0,1.0,1895.90185546875,13.18175718630007,97.98701339997933,163,123772192,True,all nn.Linear weights quantized then dequantized for fp32 execution; tiny smoke slice is too easy
