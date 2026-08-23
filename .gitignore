@@ -1,4 +1,6 @@
 .venv/
+venv/
+*-venv/
 __pycache__/
 *.pyc
 
@@ -13,8 +15,13 @@ checkpoints/
 shards/
 cache/
 entity_cache/
+logs/
+setup-logs/
 
 .claude/
+.env
+.env.*
+*.local.json
 
 *.ckpt
 *.pt
@@ -27,3 +34,8 @@ entity_cache/
 *.tar
 *.tar.gz
 *.zip
+*.log
+*.out
+*.tfevents.*
+*.parquet
+*.arrow

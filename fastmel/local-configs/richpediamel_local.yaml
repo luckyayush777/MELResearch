@@ -1,0 +1,52 @@
+# FAST-MEL / RichpediaMEL — localised copy of config/richpediamel_mlp_HN-512-1.yaml
+#
+# Differences from the shipped config, and why:
+#   * absolute paths, so the run does not depend on the working directory
+#   * image folders point at ../mimic-dataset-images/
+#   * num_entity 160933 -> 160935. kb_entity.json actually holds 160935 entities
+#     with ids 0..160934. The shipped value only happened to work because
+#     _step() rounds up with ceil(num_entity / eval_chunk_size); with a different
+#     chunk size it would silently truncate the candidate pool.
+#   * mention_img_folder uses `mention_images` (plural) — that is genuinely how
+#     the RichpediaMEL archive ships it, and the shipped config already agreed.
+#   * num_workers 8 -> 4 (see wikimel_local.yaml for the Windows spawn reasoning)
+
+run_name: RichpediaMEL
+seed: 43
+pretrained_model: 'openai/clip-vit-base-patch32'
+lr: 1e-5
+
+data:
+  num_entity: 160935
+  kb_img_folder: 'c:/Users/user/Desktop/kmpooja/thirdSem/mimic-dataset-images/RichpediaMEL/kb_image'
+  mention_img_folder: 'c:/Users/user/Desktop/kmpooja/thirdSem/mimic-dataset-images/RichpediaMEL/mention_images'
+  qid2id: 'c:/Users/user/Desktop/kmpooja/thirdSem/fastmel-source-repo/data/RichpediaMEL/qid2id.json'
+  entity: 'c:/Users/user/Desktop/kmpooja/thirdSem/fastmel-source-repo/data/RichpediaMEL/kb_entity.json'
+  train_file: 'c:/Users/user/Desktop/kmpooja/thirdSem/fastmel-source-repo/data/RichpediaMEL/RichpediaMEL_train_100cands-BM25.json'
+  dev_file: 'c:/Users/user/Desktop/kmpooja/thirdSem/fastmel-source-repo/data/RichpediaMEL/RichpediaMEL_dev_100cands-BM25.json'
+  test_file: 'c:/Users/user/Desktop/kmpooja/thirdSem/fastmel-source-repo/data/RichpediaMEL/RichpediaMEL_test_100cands-BM25.json'
+
+  batch_size: 64
+  num_workers: 4
+  text_max_length: 40
+
+  eval_chunk_size: 6000
+  eval_batch_size: 20
+  embed_update_batch_size: 512
+  hard_neg_samples: 1
+
+model:
+  embed_dim: 512
+  pooling_type: 'mlp'
+  reduction: ''
+  use_vision: True
+
+trainer:
+  accelerator: 'gpu'
+  devices: 1
+  max_epochs: 30
+  num_sanity_val_steps: 0
+  check_val_every_n_epoch: 1
+  log_every_n_steps: 30
+
+score_function: 'cosine'

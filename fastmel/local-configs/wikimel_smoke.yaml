@@ -1,0 +1,60 @@
+# FAST-MEL / WikiMEL — SMOKE TEST config.
+#
+# Purpose: prove the pipeline runs end to end (data loading -> CLIP forward ->
+# loss -> epoch-end eval -> checkpoint -> test) before committing to a 30-epoch
+# run. Not a config to report numbers from.
+#
+# Differences from wikimel_local.yaml:
+#   * max_epochs 1, and limit_*_batches caps each phase at a handful of steps.
+#     main.py does pl.Trainer(**args.trainer, ...), so anything added under the
+#     `trainer:` key is forwarded straight to the Trainer.
+#   * num_workers 0 — avoids Windows spawn entirely, so tracebacks come from the
+#     real failure rather than a worker pickling error.
+#   * batch_size 16 to keep the first run light on VRAM.
+#
+# NOTE: on_validation_start() calls _update_entity_embeds(), which embeds the
+# FULL 109,976-entity KB regardless of limit_val_batches. Expect a few minutes
+# there even on a 4090 — that pass is the bulk of the smoke test's runtime.
+
+run_name: WikiMEL_smoke
+seed: 43
+pretrained_model: 'openai/clip-vit-base-patch32'
+lr: 1e-5
+
+data:
+  num_entity: 109976
+  kb_img_folder: 'c:/Users/user/Desktop/kmpooja/thirdSem/mimic-dataset-images/WikiMEL/kb_image'
+  mention_img_folder: 'c:/Users/user/Desktop/kmpooja/thirdSem/mimic-dataset-images/WikiMEL/mention_image'
+  qid2id: 'c:/Users/user/Desktop/kmpooja/thirdSem/fastmel-source-repo/data/WikiMEL/qid2id.json'
+  entity: 'c:/Users/user/Desktop/kmpooja/thirdSem/fastmel-source-repo/data/WikiMEL/kb_entity.json'
+  train_file: 'c:/Users/user/Desktop/kmpooja/thirdSem/fastmel-source-repo/data/WikiMEL/WIKIMEL_train_100cands-BM25.json'
+  dev_file: 'c:/Users/user/Desktop/kmpooja/thirdSem/fastmel-source-repo/data/WikiMEL/WIKIMEL_dev_100cands-BM25.json'
+  test_file: 'c:/Users/user/Desktop/kmpooja/thirdSem/fastmel-source-repo/data/WikiMEL/WIKIMEL_test_100cands-BM25.json'
+
+  batch_size: 16
+  num_workers: 0
+  text_max_length: 40
+
+  eval_chunk_size: 6000
+  eval_batch_size: 20
+  embed_update_batch_size: 512
+  hard_neg_samples: 1
+
+model:
+  embed_dim: 512
+  pooling_type: 'mlp'
+  reduction: ''
+  use_vision: True
+
+trainer:
+  accelerator: 'gpu'
+  devices: 1
+  max_epochs: 1
+  num_sanity_val_steps: 0
+  check_val_every_n_epoch: 1
+  log_every_n_steps: 1
+  limit_train_batches: 8
+  limit_val_batches: 4
+  limit_test_batches: 4
+
+score_function: 'cosine'

@@ -1,0 +1,48 @@
+# FAST-MEL requirements, adjusted for this machine (RTX 4090 / sm_89, Python 3.10).
+#
+# Why these deviate from the repo's requirements.txt:
+#   torch==1.11.0+cu113   -> torch==2.0.1+cu118
+#       CUDA 11.3 has no sm_89 (Ada Lovelace) support, so the pinned build
+#       physically cannot run on an RTX 4090. cu118 is the earliest CUDA
+#       toolkit that ships sm_89 kernels.
+#   pytorch-lightning==1.7.7 -> ==1.9.5
+#       1.7.7 predates torch 2.x. 1.9.5 is the last 1.x line and is the
+#       newest PL officially validated against torch 2.0. It still supports
+#       the 1.x hooks this repo uses (validation_epoch_end / test_epoch_end)
+#       and the Trainer(amp_backend='native') argument in codes/main.py,
+#       both of which were REMOVED in PL 2.0.
+#   transformers==4.18.0  -> ==4.30.2
+#       4.18 cannot load with modern tokenizers/torch. 4.30.2 still exposes
+#       CLIPProcessor.feature_extractor, which codes/utils/dataset.py uses.
+#   numpy pinned <2 because torch 2.0.1 was built against the numpy 1.x ABI.
+#   setuptools pinned <81: setuptools 81 removed pkg_resources, and
+#       lightning_fabric/__init__.py still calls
+#       __import__("pkg_resources").declare_namespace(__name__) at import time.
+#       With a modern setuptools, `import pytorch_lightning` dies with
+#       ModuleNotFoundError: No module named 'pkg_resources'.
+#
+# Verified on this machine: torch 2.0.1+cu118 reports sm_89 for the RTX 4090 and
+# runs fp16 matmuls on it. The wheel ships no sm_89 cubin, but CUDA guarantees
+# binary compatibility within a major compute-capability generation, so the
+# sm_86 kernels execute natively on Ada.
+#
+# Install with:
+#   pip install -r requirements-adjusted.txt
+
+--extra-index-url https://download.pytorch.org/whl/cu118
+
+setuptools<81
+
+torch==2.0.1+cu118
+torchvision==0.15.2+cu118
+
+pytorch-lightning==1.9.5
+torchmetrics==0.11.4
+transformers==4.30.2
+tokenizers==0.13.3
+omegaconf==2.2.3
+pillow==9.5.0
+numpy==1.24.4
+tqdm
+tensorboard
+requests
