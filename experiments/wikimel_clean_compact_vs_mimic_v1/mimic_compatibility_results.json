@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "status": "adapter_fixes_implemented_and_verified",
+  "source_commit": "7dc5b733d9af92cb819f7ce45caffc4112b5f150",
+  "tested_environment": {
+    "python": "3.10.6",
+    "torch": "2.0.1+cu118",
+    "cuda": "11.8",
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "transformers": "4.30.2",
+    "pytorch_lightning": "1.9.5",
+    "torchmetrics": "0.11.4",
+    "omegaconf": "2.2.3",
+    "pillow": "9.5.0"
+  },
+  "tests": [
+    {
+      "name": "dependency_imports",
+      "status": "passed",
+      "evidence": "Torch, Transformers, Lightning, TorchMetrics, OmegaConf, and Pillow imported successfully."
+    },
+    {
+      "name": "upstream_config_parse",
+      "status": "passed",
+      "evidence": "WikiMEL YAML parsed with 109976 entities, batch size 128, and 20 epochs."
+    },
+    {
+      "name": "model_construction",
+      "status": "passed",
+      "evidence": "MIMICEncoder and MIMICMatcher constructed with 151715876 parameters."
+    },
+    {
+      "name": "primary_qid2id_load",
+      "status": "passed_after_fix",
+      "evidence": "The loader now uses json.load(f) and loaded all 109976 entries from the canonical pretty-printed map."
+    },
+    {
+      "name": "qid2id_read_only_shim",
+      "status": "passed",
+      "evidence": "The source single-line qid2id is structurally identical to the canonical map: 109976 entries."
+    },
+    {
+      "name": "clean_loader_inventory",
+      "status": "passed",
+      "evidence": "Loaded 18092 train, 2083 development, 4000 test, and 109976 entity rows."
+    },
+    {
+      "name": "first_train_collation",
+      "status": "passed",
+      "evidence": "Batch size 2 produced fp32 mention/entity images [2,3,224,224] and text IDs [2,40]."
+    },
+    {
+      "name": "repeat_train_collation",
+      "status": "passed_after_fix",
+      "evidence": "Train, evaluation, and entity collators each accepted the same two cached samples twice without mutation and returned batch size 2 both times."
+    },
+    {
+      "name": "fp32_cuda_forward_backward",
+      "status": "passed",
+      "evidence": "Finite loss 3.4657459259; fp32 parameters; peak allocated 1365.32 MB and peak reserved 1512.00 MB for batch size 2."
+    },
+    {
+      "name": "lightning_one_batch_fit",
+      "status": "passed",
+      "evidence": "Trainer.fit completed one fp32 GPU batch with loss 1.38 under Lightning 1.9.5."
+    },
+    {
+      "name": "deterministic_missing_image_pixels",
+      "status": "passed",
+      "evidence": "Missing and corrupt images use zero tensors, not random pixels."
+    },
+    {
+      "name": "missing_image_mask_semantics",
+      "status": "passed_after_fix",
+      "evidence": "Mention/entity flags now propagate through train, validation, test, and cached entity paths. Missing encoded visuals are exactly zero; invalid visual pair scores are exactly zero and their aggregate score equals the text-only score."
+    },
+    {
+      "name": "test_isolation",
+      "status": "passed_after_fix",
+      "evidence": "codes/main.py gates trainer.test behind run_test_after_fit, which is false in both experiment configs and defaults to false when absent."
+    },
+    {
+      "name": "sanitized_visual_config",
+      "status": "passed_after_fix",
+      "evidence": "Full and one-epoch debug configs point to clean_sanitized_visual, use precision 32, 109976 candidates, evaluation chunk size 5000, seed 43, and disable test-after-fit."
+    },
+    {
+      "name": "deterministic_cuda_startup",
+      "status": "passed_after_fix",
+      "evidence": "CUBLAS_WORKSPACE_CONFIG=:4096:8 is set before importing Torch, satisfying deterministic CUDA execution."
+    },
+    {
+      "name": "post_fix_lightning_one_batch_fit",
+      "status": "passed",
+      "evidence": "A real fp32 CUDA Trainer.fit completed one patched configured-size batch (64) with finite loss 41.2; peak allocated VRAM was 8582.84 MB."
+    }
+  ],
+  "summary": {
+    "passed": 16,
+    "failed": 0,
+    "model_cuda_compatible": true,
+    "ready_for_debug_training_without_changes": true
+  },
+  "upstream_worktree_clean_after_tests": false,
+  "local_adapter_changes_expected": true,
+  "verification_script": "verify_mimic_fixes.py"
+}

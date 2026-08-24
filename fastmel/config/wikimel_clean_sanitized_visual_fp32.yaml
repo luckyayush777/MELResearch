@@ -1,0 +1,39 @@
+run_name: WikiMEL_clean_sanitized_visual
+seed: 43
+run_test_after_fit: false
+pretrained_model: 'openai/clip-vit-base-patch32'
+lr: 1e-5
+
+data:
+  num_entity: 109976
+  kb_img_folder: ../../mimic-dataset-images/WikiMEL/kb_image
+  mention_img_folder: ../../mimic-dataset-images/WikiMEL/mention_image
+  qid2id: ../data/wikimel_clean_compact_vs_mimic_v1/clean_sanitized_visual/qid2id.json
+  entity: ../data/wikimel_clean_compact_vs_mimic_v1/clean_sanitized_visual/kb_entity.json
+  train_file: ../data/wikimel_clean_compact_vs_mimic_v1/clean_sanitized_visual/WIKIMEL_train.json
+  dev_file: ../data/wikimel_clean_compact_vs_mimic_v1/clean_sanitized_visual/WIKIMEL_dev.json
+  test_file: ../data/wikimel_clean_compact_vs_mimic_v1/clean_sanitized_visual/WIKIMEL_test.json
+  batch_size: 64
+  num_workers: 0
+  text_max_length: 40
+  eval_chunk_size: 5000
+  eval_batch_size: 20
+  embed_update_batch_size: 512
+  hard_neg_samples: 1
+
+model:
+  embed_dim: 512
+  pooling_type: 'mlp'
+  reduction: ''
+  use_vision: true
+
+trainer:
+  accelerator: 'gpu'
+  devices: 1
+  max_epochs: 30
+  num_sanity_val_steps: 0
+  check_val_every_n_epoch: 1
+  log_every_n_steps: 30
+  precision: 32
+
+score_function: 'cosine'

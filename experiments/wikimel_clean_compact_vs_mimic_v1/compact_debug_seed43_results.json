@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "status": "completed",
+  "scientific_use": "pipeline_debug_only",
+  "model": "compact pooled fp32",
+  "dataset_variant": "clean_sanitized_visual",
+  "seed": 43,
+  "epochs": 1,
+  "precision": "fp32",
+  "model_selection_split": "development",
+  "test_evaluated": false,
+  "train_rows": 18092,
+  "development_rows": 2083,
+  "candidate_entities": 109976,
+  "train_loss_epoch": 0.21217390894889832,
+  "development": {
+    "h_at_1": 0.8358137011528015,
+    "h_at_3": 0.9174267649650574,
+    "h_at_5": 0.9423907995223999,
+    "h_at_10": 0.9649543762207031,
+    "h_at_20": 0.9812769889831543,
+    "mrr": 0.8840687274932861,
+    "mean_rank": 11.341814994812012
+  },
+  "checkpoint": {
+    "path": "fastmel/runs/WikiMEL_clean_sanitized_visual_debug/wikimel_clean_sanitized_visual_fp32_debug/version_0/checkpoints/epoch=0-step=283.ckpt",
+    "bytes": 608523983,
+    "sha256": "d7a809965acfa0ea692523030220063efaf4ae2a4b94af34df6e8b5c0803ed13"
+  },
+  "completion_evidence": {
+    "trainer_message": "Trainer.fit stopped: max_epochs=1 reached.",
+    "checkpoint_monitor": "Val/mrr",
+    "checkpoint_monitor_value": 0.8840687274932861,
+    "completed_at_utc": "2026-08-23T09:01:07Z"
+  },
+  "blockers": []
+}

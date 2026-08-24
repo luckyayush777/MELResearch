@@ -36,7 +36,7 @@ class DataModuleForMIMIC(pl.LightningDataModule):
         self.tokenizer = CLIPProcessor.from_pretrained(self.args.pretrained_model).tokenizer
         self.image_processor = CLIPProcessor.from_pretrained(self.args.pretrained_model).feature_extractor
         with open(self.args.data.qid2id, 'r', encoding='utf-8') as f:
-            self.qid2id = json.loads(f.readline())
+            self.qid2id = json.load(f)
         self.raw_kb_entity = sorted(_load_json_file(self.args.data.entity), key=lambda x: x['id'])
         self.kb_entity = self.setup_dataset_for_entity(self.raw_kb_entity)
         self.kb_id2entity = {raw_ent['id']: ent for raw_ent, ent in zip(self.raw_kb_entity, self.kb_entity)}
@@ -116,10 +116,13 @@ class DataModuleForMIMIC(pl.LightningDataModule):
                     img_name)
                 img = Image.open(img_path).resize((224, 224), Image.Resampling.LANCZOS)
                 pixel_values = self.image_processor(img, return_tensors='pt')['pixel_values'].squeeze()
-            except:
-                pixel_values = torch.rand((3, 224, 224))
+            except Exception:
+                # A missing/corrupt image is represented deterministically and is
+                # accompanied by empty_img_flag. Random pixels make repeatable
+                # comparisons impossible and can inject spurious visual evidence.
+                pixel_values = torch.zeros((3, 224, 224))
         else:
-            pixel_values = torch.rand((3, 224, 224))
+            pixel_values = torch.zeros((3, 224, 224))
         return pixel_values
 
     def train_collator(self, samples):

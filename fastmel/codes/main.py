@@ -19,12 +19,12 @@ if __name__ == '__main__':
     ckpt_callbacks = ModelCheckpoint(monitor='Val/mrr', save_weights_only=True, mode='max')
     early_stop_callback = EarlyStopping(monitor="Val/mrr", min_delta=0.00, patience=3, verbose=True, mode="max")
 
-    trainer = pl.Trainer(**args.trainer,
+    trainer_kwargs = dict(args.trainer)
+    trainer_kwargs.setdefault('precision', 32)
+    trainer = pl.Trainer(**trainer_kwargs,
                          deterministic=True, logger=logger, default_root_dir="./runs",
-                         callbacks=[ckpt_callbacks, early_stop_callback],
-                         precision=16,                  
-                        amp_backend='native',           
-        )
+                         callbacks=[ckpt_callbacks, early_stop_callback])
 
     trainer.fit(lightning_model, datamodule=data_module)
-    trainer.test(lightning_model, datamodule=data_module, ckpt_path='best')
+    if getattr(args, 'run_test_after_fit', True):
+        trainer.test(lightning_model, datamodule=data_module, ckpt_path='best')

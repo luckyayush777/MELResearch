@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "captured_at_utc": "2026-08-23T08:45:21.872453+00:00",
+  "python": "3.10.6 (tags/v3.10.6:9c7b4bd, Aug  1 2022, 21:53:49) [MSC v.1932 64 bit (AMD64)]",
+  "executable": "C:\\Users\\user\\Desktop\\kmpooja\\thirdSem\\fastmel-python310-venv\\Scripts\\python.exe",
+  "platform": "Windows-10-10.0.19045-SP0",
+  "processor": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+  "torch": {
+    "version": "2.0.1+cu118",
+    "cuda_version": "11.8",
+    "cuda_available": true,
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "gpu_count": 1
+  },
+  "packages": {
+    "numpy": "1.24.4",
+    "Pillow": "9.5.0",
+    "PyYAML": "6.0.3",
+    "pytorch-lightning": "1.9.5",
+    "transformers": "4.30.2",
+    "torchvision": "0.15.2+cu118"
+  },
+  "nvidia_smi": "NVIDIA GeForce RTX 4090, 566.36, 24564 MiB",
+  "git_commit": "e7c74047b401c0ff4d849c5b9a3589ae9c81253f",
+  "git_worktree_clean": false
+}

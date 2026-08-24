@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "data_root": "C:\\Users\\user\\Desktop\\kmpooja\\thirdSem\\3rd sem\\data\\wikimel_clean_compact_vs_mimic_v1\\clean_sanitized_visual",
+  "phash_algorithm": "64-bit DCT pHash (32x32 grayscale, 8x8 low frequencies)",
+  "phash_hamming_threshold": 4,
+  "split_rows": {
+    "train": 18092,
+    "dev": 2083,
+    "test": 4000
+  },
+  "normalized_text": {
+    "within_split_duplicates": {
+      "train": {
+        "full_row": 0,
+        "mention_context": 56,
+        "context_only": 1983
+      },
+      "dev": {
+        "full_row": 0,
+        "mention_context": 3,
+        "context_only": 29
+      },
+      "test": {
+        "full_row": 0,
+        "mention_context": 3,
+        "context_only": 98
+      }
+    },
+    "cross_split": {
+      "train-dev": {
+        "full_row": {
+          "count": 0,
+          "sample": []
+        },
+        "mention_context": {
+          "count": 0,
+          "sample": []
+        },
+        "context_only": {
+          "count": 0,
+          "sample": []
+        }
+      },
+      "train-test": {
+        "full_row": {
+          "count": 0,
+          "sample": []
+        },
+        "mention_context": {
+          "count": 0,
+          "sample": []
+        },
+        "context_only": {
+          "count": 0,
+          "sample": []
+        }
+      },
+      "dev-test": {
+        "full_row": {
+          "count": 0,
+          "sample": []
+        },
+        "mention_context": {
+          "count": 0,
+          "sample": []
+        },
+        "context_only": {
+          "count": 0,
+          "sample": []
+        }
+      }
+    }
+  },
+  "images": {
+    "unique_files_referenced": 91102,
+    "missing": 1235,
+    "decode_failures": 0,
+    "cross_split": {
+      "train-dev": {
+        "exact_path_count": 0,
+        "exact_path_sample": [],
+        "exact_byte_hash_count": 0,
+        "exact_byte_hash_sample": []
+      },
+      "train-test": {
+        "exact_path_count": 0,
+        "exact_path_sample": [],
+        "exact_byte_hash_count": 0,
+        "exact_byte_hash_sample": []
+      },
+      "dev-test": {
+        "exact_path_count": 0,
+        "exact_path_sample": [],
+        "exact_byte_hash_count": 0,
+        "exact_byte_hash_sample": []
+      }
+    },
+    "mention_entity": {
+      "exact_byte_pair_count": 0,
+      "exact_byte_pair_sample": [],
+      "gold_exact_byte_pair_count": 0,
+      "gold_exact_byte_pair_sample": [],
+      "perceptual_candidate_pair_count": 0,
+      "perceptual_candidate_distance_counts": {},
+      "perceptual_candidate_samples_by_distance": {},
+      "perceptual_candidate_pair_sample": [],
+      "gold_perceptual_candidate_pair_count": 0,
+      "gold_perceptual_candidate_distance_counts": {},
+      "gold_perceptual_candidate_samples_by_distance": {},
+      "gold_perceptual_candidate_pair_sample": [],
+      "perceptual_candidates_confirmed": false,
+      "review_required": false
+    }
+  },
+  "label_metadata": {
+    "mention_filenames_containing_answer_id": 0,
+    "candidate_lists_present": false,
+    "qid2id_matches_kb_order": true,
+    "entity_id_ordering_sha256": "f9e625782e4f4743f8842dc49f9ec16895b59bf78bf873d8c54a4453f788b82c"
+  },
+  "acceptance_gate": {
+    "normalized_cross_split_zero": true,
+    "exact_image_bytes_cross_split_zero": true,
+    "gold_entity_exact_image_bytes_zero": true,
+    "answer_id_filename_zero": true,
+    "perceptual_review_complete": true,
+    "accepted": true
+  }
+}

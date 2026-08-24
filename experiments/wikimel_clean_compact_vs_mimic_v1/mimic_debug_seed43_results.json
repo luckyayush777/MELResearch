@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "status": "completed",
+  "scientific_use": "pipeline_debug_only",
+  "model": "MIMIC fp32",
+  "upstream_commit": "7dc5b733d9af92cb819f7ce45caffc4112b5f150",
+  "dataset_variant": "clean_sanitized_visual",
+  "seed": 43,
+  "epochs": 1,
+  "precision": "fp32",
+  "batch_size": 64,
+  "model_selection_split": "development",
+  "test_evaluated": false,
+  "train_rows": 18092,
+  "development_rows": 2083,
+  "candidate_entities": 109976,
+  "train_loss_epoch": 2.1600749492645264,
+  "development": {
+    "h_at_1": 0.039846375420067214,
+    "h_at_3": 0.09313490158425348,
+    "h_at_5": 0.12914066250600095,
+    "h_at_10": 0.20067210753720596,
+    "h_at_20": 0.27652424387902064,
+    "mrr": 0.0932518466373739,
+    "mean_rank": 371.28516562650026
+  },
+  "checkpoint": {
+    "path": "external/MIMIC_reproduction/runs/WikiMEL_clean_sanitized_visual_MIMIC_fp32_debug/version_0/checkpoints/epoch=0-step=283.ckpt",
+    "bytes": 607055910,
+    "sha256": "08e213758f05b556c15a41320fb7c91a35a89a1e6979449b236556e78c5f7c45"
+  },
+  "completion_evidence": {
+    "trainer_message": "Trainer.fit stopped: max_epochs=1 reached.",
+    "checkpoint_monitor": "Val/mrr",
+    "checkpoint_monitor_value": 0.0932518466373739,
+    "completed_at_utc": "2026-08-23T09:49:23Z",
+    "traceback_found": false,
+    "cuda_failure_found": false
+  },
+  "blockers": []
+}

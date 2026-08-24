@@ -1,0 +1,20 @@
+Data root: data\wikimel_clean_compact_vs_mimic_v1\clean_sanitized_visual
+train: rows=18092 unique_answers=13168 unique_images=16153 unique_texts=18038
+dev: rows=2083 unique_answers=1972 unique_images=2057 unique_texts=2081
+test: rows=4000 unique_answers=3659 unique_images=3904 unique_texts=3997
+
+Split overlap:
+train-dev exact: 0 overlap (0.00% of smaller)
+train-dev mention_sentence: 0 overlap (0.00% of smaller)
+train-dev image: 0 overlap (0.00% of smaller)
+train-test exact: 0 overlap (0.00% of smaller)
+train-test mention_sentence: 0 overlap (0.00% of smaller)
+train-test image: 0 overlap (0.00% of smaller)
+dev-test exact: 0 overlap (0.00% of smaller)
+dev-test mention_sentence: 0 overlap (0.00% of smaller)
+dev-test image: 0 overlap (0.00% of smaller)
+
+Gold entity image leakage:
+train: 0/18092 rows have mention image inside gold entity image_list (0.00%)
+dev: 0/2083 rows have mention image inside gold entity image_list (0.00%)
+test: 0/4000 rows have mention image inside gold entity image_list (0.00%)

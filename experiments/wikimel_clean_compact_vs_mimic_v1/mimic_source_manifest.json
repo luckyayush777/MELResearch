@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "repository": "https://github.com/pengfei-luo/MIMIC.git",
+  "repository_claim": "Official implementation of Multi-Grained Multimodal Interaction Network for Entity Linking",
+  "local_path": "external/MIMIC_reproduction",
+  "branch": "master",
+  "commit": "7dc5b733d9af92cb819f7ce45caffc4112b5f150",
+  "remote_head_verified": true,
+  "git_fsck_passed": true,
+  "worktree_clean_after_clone": true,
+  "cloned_at_utc": "2026-08-23T09:06:30.1776252Z",
+  "required_files_verified": [
+    "codes/main.py",
+    "codes/model/lightning_mimic.py",
+    "codes/model/modeling_mimic.py",
+    "codes/utils/dataset.py",
+    "config/wikimel.yaml",
+    "requirements.txt"
+  ],
+  "upstream_environment": {
+    "python_recommended": "3.8.12",
+    "torch": "1.11.0+cu113",
+    "transformers": "4.18.0",
+    "pytorch_lightning": "1.7.7"
+  },
+  "local_adapter_state": {
+    "modified_after_sourcing": true,
+    "files": [
+      "codes/main.py",
+      "codes/model/lightning_mimic.py",
+      "codes/model/modeling_mimic.py",
+      "codes/utils/dataset.py",
+      "config/wikimel_clean_sanitized_visual_fp32.yaml",
+      "config/wikimel_clean_sanitized_visual_fp32_debug.yaml"
+    ],
+    "reason": "Clean-data compatibility, repeat-safe collation, effective missing-image masking, deterministic CUDA startup, and test isolation."
+  },
+  "notes": "The external directory is intentionally ignored by the parent experiment repository. This manifest pins the untouched upstream base commit and records the later local experiment adapter."
+}
